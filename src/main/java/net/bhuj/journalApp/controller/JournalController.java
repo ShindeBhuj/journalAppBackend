@@ -29,24 +29,44 @@ public class JournalController {
         return journalEntryService.getAll();
     }
 
-    @PostMapping
-    public boolean createJournal(@RequestBody JournalEntry journalEntry) {
-        journalEntryService.saveEntry(journalEntry);
-        return true;
+    @PostMapping()
+    public ResponseEntity<JournalEntry> createJournal(@RequestBody JournalEntry journalEntry) {
+        try {
+            journalEntryService.saveEntry(journalEntry);
+            return new ResponseEntity<>(journalEntry, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("{id}")
-    public JournalEntry updateById(@PathVariable ObjectId id, @RequestBody JournalEntry journalEntry) {
-        return journalEntryService.updateById(id, journalEntry);
+    public ResponseEntity<JournalEntry> updateById(@PathVariable ObjectId id, @RequestBody JournalEntry journalEntry) {
+        try {
+            JournalEntry jo = journalEntryService.updateById(id, journalEntry);
+            return new ResponseEntity<>(jo, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("{id}")
-    public boolean deleteById(@PathVariable ObjectId id) {
-        return journalEntryService.deleteEntry(id);
+    public ResponseEntity<?> deleteById(@PathVariable ObjectId id) {
+        try {
+            journalEntryService.deleteEntry(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @DeleteMapping
-    public boolean deleteAll() {
-        return journalEntryService.deleteAll();
+    public ResponseEntity<?> deleteAll() {
+        try {
+            journalEntryService.deleteAll();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
