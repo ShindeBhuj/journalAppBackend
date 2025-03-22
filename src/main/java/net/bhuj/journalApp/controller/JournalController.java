@@ -4,20 +4,24 @@ import net.bhuj.journalApp.entity.JournalEntry;
 import net.bhuj.journalApp.service.JournalEntryService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/journal")
-public class JournalControllerV2 {
+public class JournalController {
 
     @Autowired
     private JournalEntryService journalEntryService;
 
     @GetMapping("{id}")
-    public JournalEntry getJournalById(@PathVariable ObjectId id) {
-        return journalEntryService.getById(id).orElse(null);
+    public ResponseEntity<JournalEntry> getJournalById(@PathVariable ObjectId id) {
+        return journalEntryService.getById(id)
+                .map(journalEntry -> new ResponseEntity<>(journalEntry, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping
