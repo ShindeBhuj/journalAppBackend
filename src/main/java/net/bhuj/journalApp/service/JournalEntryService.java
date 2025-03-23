@@ -2,6 +2,7 @@ package net.bhuj.journalApp.service;
 
 
 import net.bhuj.journalApp.entity.JournalEntry;
+import net.bhuj.journalApp.entity.User;
 import net.bhuj.journalApp.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,22 +17,32 @@ public class JournalEntryService {
 
     @Autowired
     private JournalEntryRepository journalEntryRepository;
+    @Autowired
+    private UserService userService;
 
-    public void saveEntry(JournalEntry journalEntry) {
+    public void saveEntry(JournalEntry journalEntry, String userName) {
         journalEntry.setDateTime(LocalDateTime.now());
-        journalEntryRepository.save(journalEntry);
+        JournalEntry saved = journalEntryRepository.save(journalEntry);
+        User user = userService.getByUserName(userName);
+        user.getJournalEntries().add(saved);
+        userService.saveEntry(user);
     }
 
-    public List<JournalEntry> getAll() {
-        return journalEntryRepository.findAll();
+    public List<JournalEntry> getAllJournalByUser(String userName) {
+        User user = userService.getByUserName(userName);
+        return user.getJournalEntries();
+//        return journalEntryRepository.findAll();
     }
 
     public Optional<JournalEntry> getById(ObjectId id) {
         return journalEntryRepository.findById(id);
     }
 
-    public boolean deleteEntry(ObjectId id) {
+    public boolean deleteEntry(ObjectId id, String userName) {
         journalEntryRepository.deleteById(id);
+        User user = userService.getByUserName(userName);
+        user.getJournalEntries().removeIf(jo -> jo.getId().equals(id));
+        userService.saveEntry(user);
         return true;
     }
 

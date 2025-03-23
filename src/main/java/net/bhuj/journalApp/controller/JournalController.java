@@ -17,22 +17,22 @@ public class JournalController {
     @Autowired
     private JournalEntryService journalEntryService;
 
-    @GetMapping("{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<JournalEntry> getJournalById(@PathVariable ObjectId id) {
         return journalEntryService.getById(id)
                 .map(journalEntry -> new ResponseEntity<>(journalEntry, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping
-    public List<JournalEntry> getAll() {
-        return journalEntryService.getAll();
+    @GetMapping("{userName}")
+    public List<JournalEntry> getAllJournalByUser(@PathVariable String userName) {
+        return journalEntryService.getAllJournalByUser(userName);
     }
 
-    @PostMapping()
-    public ResponseEntity<JournalEntry> createJournal(@RequestBody JournalEntry journalEntry) {
+    @PostMapping("{userName}")
+    public ResponseEntity<JournalEntry> createJournal(@RequestBody JournalEntry journalEntry, @PathVariable String userName) {
         try {
-            journalEntryService.saveEntry(journalEntry);
+            journalEntryService.saveEntry(journalEntry, userName);
             return new ResponseEntity<>(journalEntry, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -49,10 +49,10 @@ public class JournalController {
         }
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteById(@PathVariable ObjectId id) {
+    @DeleteMapping("{userName}/{id}")
+    public ResponseEntity<?> deleteById(@PathVariable ObjectId id, @PathVariable String userName) {
         try {
-            journalEntryService.deleteEntry(id);
+            journalEntryService.deleteEntry(id, userName);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
